@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from ga import genetic_algorithm
+from genetic_algorithm import genetic_algorithm
 
 # 個体の評価関数(one-max問題)
 def eval_ind(ind):
