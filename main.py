@@ -26,7 +26,7 @@ def break_cond_sqrt2(elite):
     gene = elite[0]
     ans = gene/2**GENE_LENGTH + 1
     error = abs(2-ans**2)
-    return error <= 5e-6
+    return error <= 1/GENE_LENGTH
 
 # 学習経過の表示(sqrt2)
 def print_sqrt2(i, elite):
@@ -48,8 +48,8 @@ def print_sqrt2(i, elite):
 # sqrt2
 GENE_LENGTH = 2**20
 INDIVI_NUM  = 20
-MUTATE_PROB = 0.5
-GENERATIONS = 10000
+MUTATE_PROB = 0.05
+GENERATIONS = 1000
 
 ## one-max問題
 #elite = genetic_algorithm(GENE_LENGTH, INDIVI_NUM, MUTATE_PROB, GENERATIONS, eval_ind, break_condition)

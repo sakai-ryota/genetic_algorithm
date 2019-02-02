@@ -2,7 +2,8 @@
 import random
 import matplotlib.pyplot as plt
 
-def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eval_func, break_func=None, print_func=None):
+def genetic_algorithm(gene_length, individual_num, mutate_prob,
+        generations, eval_func, break_func=None, print_func=None):
     """
     genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eval_func, break_func=None)
 
@@ -13,9 +14,10 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eva
         generations:        number of generations.
         eval_func:          function of evaluation of individual.
         break_func:         (optional) main loop break condition.
+        print_func:         (optional) score print function.
     """
     # 一点交叉を行なう関数
-    def cross_over(a, b):
+    def one_point_cross_over(a, b):
         # 交叉を行なう位置をランダムに決定
         mid = random.randint(1, gene_length)
         # 下位ビットマスク
@@ -27,6 +29,16 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eva
         a = (a&gmask)|(b&lmask)
         b = (b&gmask)|(c&lmask)
         return (a, b, mid)
+
+    # （なんちゃって）一様交叉を行う関数
+    def uniform_cross_over(a, b):
+        mask = random.randint(0, 2**8-1)
+        rmask = ~mask&(2**8-1)
+        # 交叉
+        c = a
+        a = (a&mask) | (b&rmask)
+        b = (b&mask) | (c&rmask)
+        return (a, b, mask)
 
     # 突然変異を行なう関数
     def mutate(a):
@@ -67,11 +79,16 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eva
         for i in range(len(population)-1):
             # ２個体を選択
             a, b = random.choices(population, weights=fitness_list, k=2)
-            ## 重複していれば選び直し
-            #while a == b:
-            #    a, b = random.choices(population, weights=fitness_list, k=2)
-            # 一点交叉
-            a, b, _ = cross_over(a, b)
+            # 重複していれば選び直し
+            while a == b:
+                a, b = random.choices(population, weights=fitness_list, k=2)
+            # 交叉（一点と一様の入れ替えは適当）
+            if random.randint(0,100)<95:
+                # 一点交叉
+                a, b, _ = one_point_cross_over(a, b)
+            else:
+                # 一様交叉
+                a, b, _ = uniform_cross_over(a, b)
             # 突然変位
             a, _ = mutate(a)
             # 次世代リストへの格納
