@@ -2,7 +2,7 @@
 import random
 import matplotlib.pyplot as plt
 
-def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eval_func, break_func=None):
+def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eval_func, break_func=None, print_func=None):
     """
     genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eval_func, break_func=None)
 
@@ -40,6 +40,10 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eva
             # 乱数が閾値を超えたら突然変異を行わない
             return (a, mask)
 
+    # デフォルトの学習経過表示関数
+    def default_print_func(i, elite):
+        print(f'{i:<7}{elite[0]:0{gene_length}b}{elite[1]:>5}/{gene_length}')
+
     # 各世代の最高スコアを格納するためのリスト
     score_list = []
     # 現世代のリスト(初期化)
@@ -55,7 +59,11 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eva
         pop_next.append(eval_list[-1][0])
         # 現世代の最高スコアを格納
         score_list.append(eval_list[-1][1])
-        print(f'{i:<7}{eval_list[-1][0]:0{gene_length}b}{eval_list[-1][1]:>5}/{gene_length}')
+        # 学習経過を表示
+        if print_func == None:
+            default_print_func(i, eval_list[-1])
+        else:
+            print_func(i, eval_list[-1])
         for i in range(len(population)-1):
             # ２個体を選択
             a, b = random.choices(population, weights=fitness_list, k=2)
@@ -72,7 +80,7 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eva
         population = pop_next.copy()
         # one-max問題が解けたら終了
         if break_func != None:
-            if break_func(eval_list[-1][0]):
+            if break_func(eval_list[-1]):
                 break
 
     # 最高スコアの推移をプロット
@@ -80,3 +88,5 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eva
     plt.tight_layout()
 
     plt.show()
+
+    return eval_list[-1]
