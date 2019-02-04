@@ -2,8 +2,15 @@
 import random
 import matplotlib.pyplot as plt
 
-def genetic_algorithm(gene_length, individual_num, mutate_prob,
-        generations, eval_func, break_func=None, print_func=None):
+def plot_highscores(highscore_list):
+    # 最高スコアの推移をプロット
+    plt.plot(highscore_list)
+    plt.tight_layout()
+
+    plt.show()
+
+def genetic_algorithm(gene_length, individual_num, mutate_prob, eval_func,
+        generations=1000, break_func=None, print_func=None):
     """
     genetic_algorithm(gene_length, individual_num, mutate_prob, generations, eval_func, break_func=None)
 
@@ -54,10 +61,10 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob,
 
     # デフォルトの学習経過表示関数
     def default_print_func(i, elite):
-        print(f'{i:<7}{elite[0]:0{gene_length}b}{elite[1]:>5}/{gene_length}')
+        print(f'{i:<7}', end='\r')
 
     # 各世代の最高スコアを格納するためのリスト
-    score_list = []
+    highscore_list = []
     # 現世代のリスト(初期化)
     population = [random.randint(0, 2**gene_length-1) for _ in range(individual_num)]
     for i in range(generations):
@@ -70,7 +77,7 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob,
         # エリート個体を次世代リストへ格納
         pop_next.append(eval_list[-1][0])
         # 現世代の最高スコアを格納
-        score_list.append(eval_list[-1][1])
+        highscore_list.append(eval_list[-1][1])
         # 学習経過を表示
         if print_func == None:
             default_print_func(i, eval_list[-1])
@@ -79,11 +86,11 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob,
         for i in range(len(population)-1):
             # ２個体を選択
             a, b = random.choices(population, weights=fitness_list, k=2)
-            ## 重複していれば選び直し
-            #while a == b:
-            #    a, b = random.choices(population, weights=fitness_list, k=2)
+            # 重複していれば選び直し
+            while a == b:
+                a, b = random.choices(population, weights=fitness_list, k=2)
             # 交叉（一点と一様の入れ替えは適当）
-            if random.randint(0,100)<95:
+            if random.random() < 0.95:
                 # 一点交叉
                 a, b, _ = one_point_cross_over(a, b)
             else:
@@ -100,10 +107,4 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob,
             if break_func(eval_list[-1]):
                 break
 
-    # 最高スコアの推移をプロット
-    plt.plot(score_list)
-    plt.tight_layout()
-
-    plt.show()
-
-    return eval_list[-1]
+    return eval_list, highscore_list
