@@ -79,9 +79,9 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob,
         for i in range(len(population)-1):
             # ２個体を選択
             a, b = random.choices(population, weights=fitness_list, k=2)
-            # 重複していれば選び直し
-            while a == b:
-                a, b = random.choices(population, weights=fitness_list, k=2)
+            ## 重複していれば選び直し
+            #while a == b:
+            #    a, b = random.choices(population, weights=fitness_list, k=2)
             # 交叉（一点と一様の入れ替えは適当）
             if random.randint(0,100)<95:
                 # 一点交叉
