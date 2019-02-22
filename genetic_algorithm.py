@@ -51,6 +51,7 @@ def genetic_algorithm(gene_length, individual_num, mutate_prob, eval_func,
     def mutate(a):
         # マスクの作成
         mask = random.randint(0, 2**gene_length-1)
+        #mask = 2**random.randint(0, gene_length-1)
         # 乱数によって突然変異を制御
         if random.random() <= mutate_prob:
             # 排他的論理和によってデータを書き換える
