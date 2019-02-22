@@ -53,35 +53,26 @@ for i in range(1, int(EOS/dt)):
 
 # GAの問題設定
 def prob_rg(ind):
-    r_series = decode_ind(ind)
-    X, _ = sim_ind(r_series)
+    X, _ = sim_ind(ind)
     return evaluate_ind(X, Xnom)
 
-# シミュレーションとデコードを同時に実行することはできないのか
-def decode_ind(ind):
-    mask = 2**3-1
-    floatize = []
-    for i in range(int(EOS/dt)):
-        floatize.append(rd*(ind&mask)/255)
-        ind >>= 3
-    rev = list(reversed(floatize))
-    ref = [rev[0]]
-    for i in range(1, int(EOS/dt)):
-        ref.append(ref[-1]+rev[i])
-    return ref
-
-def sim_ind(r_series):
+def sim_ind(ind):
     x   = np.array([[0.0, 0.0]]).T
     X   = [x[0,0]]
     T   = [0.0]
     SUM = 0.0
     lx  = x[0,0]
+    mask = 2**3-1
+    ref = rd*(ind&mask)/255
+    ind >>=3
     for i in range(1, int(EOS/dt)):
-        e    = r_series[i-1] - x[0,0]
+        e    = ref - x[0,0]
         SUM += e*dt
         u    = kp*e + ki*SUM - kd*(x[0,0] - lx)/dt
         lx   = x[0,0]
         x    = plant(x, u)
+        ref += rd*(ind&mask)/255
+        ind >>=3
         X.append(x[0,0])
         T.append(i*dt)
     return X, T
@@ -95,23 +86,22 @@ def evaluate_ind(x, xnom):
 
 # 学習過程の表示関数
 def print_rg(i, elite):
-    print(f'iter:{i+1:>7}   score:{elite[1]:>10.7}')
+    print(f'iter:{i+1:>7}   score:{elite[1]:>10.7}', end='\r')
 
 # 学習結果の確認グラフ作成
 def plot_ind(ind):
-    r_series = decode_ind(ind)
-    X, T = sim_ind(r_series)
+    X, T = sim_ind(ind)
     plt.plot(T, Xsim, label='simple')
-    plt.plot(T, Xnom, lable='nominal')
+    plt.plot(T, Xnom, label='nominal')
     plt.plot(T, X, label='rg')
-    plt.legend(loc='best')
+    plt.legend()
     plt.show()
 
 if __name__=='__main__':
     GENE_LENGTH = 8*int(EOS/dt)
     INDIVI_NUM  = 100
     MUTATE_PROB = 0.1
-    GENERATIONS = 1000
+    GENERATIONS = 10000
 
     individuals, highscore_list = genetic_algorithm(GENE_LENGTH, INDIVI_NUM, MUTATE_PROB, prob_rg, generations=GENERATIONS, print_func=print_rg)
 
